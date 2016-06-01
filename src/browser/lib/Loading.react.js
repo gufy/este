@@ -1,9 +1,18 @@
 // Text loading component with two important limits.
 // https://www.nngroup.com/articles/response-times-3-important-limits
+// Example:
+// {!users ?
+//   <Loading />
+// :
+//   <div>
+//     users here
+//   </div>
+// }
+// TODO: Make it universal.
 
 import './Loading.scss';
 import Component from 'react-pure-render/component';
-import React, {PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 
 export default class Loading extends Component {
 
@@ -14,23 +23,23 @@ export default class Loading extends Component {
 
   static defaultProps = {
     loadingText: 'Loading',
-    longLoadingText: 'Still loading, please check your internet connection'
+    longLoadingText: 'Still loading, please check your connection'
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      // Don't show anything for the first second.
-      currentText: ''
+      // Render no-break space for the first second of loading.
+      currentText: String.fromCharCode(160)
     };
   }
 
   componentDidMount() {
     this.timer = setTimeout(() => {
-      this.setState({currentText: this.props.loadingText});
+      this.setState({ currentText: this.props.loadingText });
     }, 1000);
     this.longTimer = setTimeout(() => {
-      this.setState({currentText: this.props.longLoadingText});
+      this.setState({ currentText: this.props.longLoadingText });
     }, 10000);
   }
 

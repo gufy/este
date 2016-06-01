@@ -2,16 +2,15 @@
 
 // Because root .babelrc is configured for react-native (browser users webpack
 // and server has own .babelrc file), we have to require regenerator explicitly.
-import 'regenerator/runtime';
+import 'regenerator-runtime/runtime';
 
 import gulp from 'gulp';
 import gutil from 'gulp-util';
 import mocha from 'gulp-mocha';
 import path from 'path';
-import serverConfig from '../src/server/config';
 
 // To ignore webpack custom loaders on server.
-serverConfig.webpackStylesExtensions.forEach(ext => {
+['css', 'less', 'sass', 'scss', 'styl'].forEach(ext => {
   require.extensions['.' + ext] = () => {};
 });
 

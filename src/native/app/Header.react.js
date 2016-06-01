@@ -1,9 +1,6 @@
 import Component from 'react-pure-render/component';
-import React from 'react-native';
-
-const {
-  Image, PropTypes, StyleSheet, Text, TouchableOpacity, View
-} = React;
+import React, { PropTypes } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
@@ -46,7 +43,7 @@ export default class Header extends Component {
   };
 
   render() {
-    const {title, toggleSideMenu} = this.props;
+    const { title, toggleSideMenu } = this.props;
 
     return (
       <View style={styles.container}>

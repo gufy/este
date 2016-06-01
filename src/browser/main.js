@@ -1,30 +1,36 @@
-/* eslint-disable import/default */
-import 'babel-polyfill';
-import Bluebird from 'bluebird';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import configureReporting from '../common/configureReporting';
 import configureStore from '../common/configureStore';
+import createEngine from 'redux-storage-engine-localstorage';
 import createRoutes from './createRoutes';
-import {IntlProvider} from 'react-intl';
-import {Provider} from 'react-redux';
-import {Router} from 'react-router';
-import {browserHistory} from 'react-router';
+import useScroll from 'react-router-scroll';
+import { Provider } from 'react-redux';
+import { Router, applyRouterMiddleware, browserHistory } from 'react-router';
+import { routerMiddleware, syncHistoryWithStore } from 'react-router-redux';
 
-// http://bluebirdjs.com/docs/why-bluebird.html
-window.Promise = Bluebird;
-
-const app = document.getElementById('app');
 const initialState = window.__INITIAL_STATE__;
-const store = configureStore({initialState});
+const reportingMiddleware = configureReporting({
+  appVersion: initialState.config.appVersion,
+  sentryUrl: initialState.config.sentryUrl,
+  unhandledRejection: fn => window.addEventListener('unhandledrejection', fn)
+});
+const store = configureStore({
+  createEngine,
+  initialState,
+  platformMiddleware: [reportingMiddleware, routerMiddleware(browserHistory)]
+});
+const history = syncHistoryWithStore(browserHistory, store);
 const routes = createRoutes(store.getState);
 
 ReactDOM.render(
   <Provider store={store}>
-    <IntlProvider>
-      <Router history={browserHistory}>
-        {routes}
-      </Router>
-    </IntlProvider>
-  </Provider>,
-  app
+    <Router
+      history={history}
+      render={applyRouterMiddleware(useScroll())}
+    >
+      {routes}
+    </Router>
+  </Provider>
+  , document.getElementById('app')
 );

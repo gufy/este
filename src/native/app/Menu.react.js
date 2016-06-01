@@ -1,9 +1,8 @@
 import Component from 'react-pure-render/component';
-import React, {Dimensions} from 'react-native';
-
-const {
-  PropTypes, ScrollView, StyleSheet, Text, View
-} = React;
+import React, { PropTypes } from 'react';
+import linksMessages from '../../common/app/linksMessages';
+import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { injectIntl, intlShape } from 'react-intl';
 
 const window = Dimensions.get('window');
 
@@ -24,26 +23,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 10,
     color: '#fff'
-  },
-  header: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 10,
-    marginBottom: 10
   }
 });
 
-export default class Menu extends Component {
+class Menu extends Component {
 
   static propTypes = {
-    links: PropTypes.object.isRequired,
+    intl: intlShape.isRequired,
     onRouteChange: PropTypes.func.isRequired
   };
 
   render() {
-    const {links, onRouteChange} = this.props;
-    const pages = ['home', 'todos'];
+    const { intl, onRouteChange } = this.props;
 
     return (
       <ScrollView
@@ -52,17 +43,23 @@ export default class Menu extends Component {
         style={styles.container}
       >
         <View>
-          {pages.map(page =>
-            <Text
-              key={page}
-              onPress={() => onRouteChange(page)} // eslint-disable-line react/jsx-no-bind
-              style={styles.item}
-            >{links[page]}</Text>
-          )}
+          <Text
+            onPress={() => onRouteChange('home')} // eslint-disable-line react/jsx-no-bind
+            style={styles.item}
+          >{intl.formatMessage(linksMessages.home)}</Text>
+          <Text
+            onPress={() => onRouteChange('todos')} // eslint-disable-line react/jsx-no-bind
+            style={styles.item}
+          >{intl.formatMessage(linksMessages.todos)}</Text>
+          <Text
+            onPress={() => onRouteChange('intl')} // eslint-disable-line react/jsx-no-bind
+            style={styles.item}
+          >{intl.formatMessage(linksMessages.intl)}</Text>
         </View>
-        {/* TODO: Switch language here. */}
       </ScrollView>
     );
   }
 
 }
+
+export default injectIntl(Menu);

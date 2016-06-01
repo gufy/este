@@ -1,78 +1,100 @@
 import './Login.scss';
-import * as authActions from '../../common/auth/actions';
 import Component from 'react-pure-render/component';
-import Helmet from 'react-helmet';
-import React, {PropTypes} from 'react';
-import focusInvalidField from '../lib/focusInvalidField';
-import {connect} from 'react-redux';
-import {fields} from '../../common/lib/redux-fields';
+import LoginError from './LoginError.react';
+import React, { PropTypes } from 'react';
+import buttonsMessages from '../../common/app/buttonsMessages';
+import { FormattedMessage, defineMessages, injectIntl, intlShape } from 'react-intl';
+import { browserHistory, locationShape } from 'react-router';
+import { connect } from 'react-redux';
+import { fields } from '../../common/lib/redux-fields';
+import { focusInvalidField } from '../../common/lib/validation';
+import { login } from '../../common/auth/actions';
+
+const messages = defineMessages({
+  emailPlaceholder: {
+    defaultMessage: 'your@email.com',
+    id: 'auth.login.emailPlaceholder'
+  },
+  formLegend: {
+    defaultMessage: 'Classic XMLHttpRequest Login',
+    id: 'auth.login.formLegend'
+  },
+  hint: {
+    defaultMessage: 'Hint: pass1',
+    id: 'auth.login.hint'
+  },
+  passwordPlaceholder: {
+    defaultMessage: 'password',
+    id: 'auth.login.passwordPlaceholder'
+  }
+});
 
 class Login extends Component {
 
   static propTypes = {
     auth: PropTypes.object.isRequired,
     fields: PropTypes.object.isRequired,
-    location: PropTypes.object.isRequired,
-    login: PropTypes.func.isRequired,
-    msg: PropTypes.object.isRequired
-  };
-
-  static contextTypes = {
-    router: PropTypes.object.isRequired
+    intl: intlShape.isRequired,
+    location: locationShape,
+    login: PropTypes.func.isRequired
   };
 
   constructor(props) {
     super(props);
-    // Read why we bind event handlers explicitly.
-    // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md
     this.onFormSubmit = this.onFormSubmit.bind(this);
   }
 
   async onFormSubmit(e) {
     e.preventDefault();
-    const {login, fields} = this.props;
-    const result = await login(fields.$values()).payload.promise;
-    if (result.error) {
-      focusInvalidField(this, result.payload);
-      return;
+    const { login, fields } = this.props;
+    try {
+      await login(fields.$values());
+    } catch (error) {
+      focusInvalidField(this, error.reason);
+      throw error;
     }
     this.redirectAfterLogin();
   }
 
   redirectAfterLogin() {
-    const {location} = this.props;
+    const { location } = this.props;
     const nextPathname = location.state && location.state.nextPathname || '/';
-    this.context.router.replace(nextPathname);
+    browserHistory.replace(nextPathname);
   }
 
   render() {
-    const {auth, fields, msg} = this.props;
+    const { auth, fields } = this.props;
+    const { intl } = this.props;
+    const emailPlaceholder = intl.formatMessage(messages.emailPlaceholder);
+    const passwordPlaceholder = intl.formatMessage(messages.passwordPlaceholder);
 
     return (
       <div className="login">
-        <Helmet title="Login" />
         <form onSubmit={this.onFormSubmit}>
           <fieldset disabled={auth.formDisabled}>
-            <legend>{msg.legend}</legend>
+            <legend>
+              <FormattedMessage {...messages.formLegend} />
+            </legend>
             <input
-              autoFocus
-              maxLength="100"
-              placeholder={msg.placeholder.email}
               {...fields.email}
+              maxLength="100"
+              placeholder={emailPlaceholder}
             />
             <br />
             <input
-              maxLength="300"
-              placeholder={msg.placeholder.password}
-              type="password"
               {...fields.password}
+              maxLength="300"
+              placeholder={passwordPlaceholder}
+              type="password"
             />
             <br />
-            <button type="submit">{msg.button.login}</button>
-            <span className="hint">{msg.hint}</span>
-            {auth.formError &&
-              <p className="error-message">{auth.formError.message}</p>
-            }
+            <button type="submit">
+              <FormattedMessage {...buttonsMessages.login} />
+            </button>
+            <span className="hint">
+              <FormattedMessage {...messages.hint} />
+            </span>
+            <LoginError error={auth.formError} />
           </fieldset>
         </form>
       </div>
@@ -86,7 +108,8 @@ Login = fields(Login, {
   fields: ['email', 'password']
 });
 
+Login = injectIntl(Login);
+
 export default connect(state => ({
-  auth: state.auth,
-  msg: state.intl.msg.auth.form
-}), authActions)(Login);
+  auth: state.auth
+}), { login })(Login);

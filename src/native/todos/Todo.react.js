@@ -1,9 +1,6 @@
 import Component from 'react-pure-render/component';
-import React from 'react-native';
-
-const {
-  Image, PropTypes, StyleSheet, TextInput, TouchableOpacity, View
-} = React;
+import React, { PropTypes } from 'react';
+import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
@@ -38,12 +35,12 @@ export default class Todo extends Component {
   }
 
   onTouchableOpacityPress() {
-    const {todo, toggleTodoCompleted} = this.props;
+    const { todo, toggleTodoCompleted } = this.props;
     toggleTodoCompleted(todo);
   }
 
   render() {
-    const {todo} = this.props;
+    const { todo } = this.props;
     const image = todo.completed
       ? require('./img/SelectedCheckbox.png')
       : require('./img/EmptyCheckbox.png');

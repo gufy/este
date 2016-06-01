@@ -1,13 +1,12 @@
 import * as todosActions from '../../common/todos/actions';
 import Buttons from './Buttons.react';
 import Component from 'react-pure-render/component';
-import React from 'react-native';
+import React, { PropTypes } from 'react';
 import Todo from './Todo.react';
-import {connect} from 'react-redux';
-
-const {
-  Image, PropTypes, ScrollView, StyleSheet, Text, View
-} = React;
+import todosMessages from '../../common/todos/todosMessages';
+import { FormattedMessage } from 'react-intl';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { connect } from 'react-redux';
 
 const styles = StyleSheet.create({
   centeredView: {
@@ -16,7 +15,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingBottom: 40
   },
-  noTodosText: {
+  empty: {
     color: '#aaa',
     fontSize: 20
   },
@@ -35,28 +34,28 @@ const styles = StyleSheet.create({
 class Todos extends Component {
 
   static propTypes = {
-    msg: PropTypes.object.isRequired,
     todos: PropTypes.object.isRequired,
     toggleTodoCompleted: PropTypes.func.isRequired
   };
 
   render() {
-    const {msg, todos, toggleTodoCompleted} = this.props;
+    const { todos, toggleTodoCompleted } = this.props;
 
-    if (todos.size === 0)
+    if (todos.size === 0) {
       return (
         <View style={styles.centeredView}>
           <Image
             source={require('./img/EmptyState.png')}
             style={styles.icon}
           />
-          <Text style={styles.noTodosText}>
-            {msg.empty}
-          </Text>
+          <FormattedMessage {...todosMessages.empty}>
+            {message => <Text style={styles.empty}>{message}</Text>}
+          </FormattedMessage>
         </View>
       );
+    }
 
-    const list = todos.toList().sortBy(item => item.createdAt);
+    const list = todos.toList().sortBy(item => item.createdAt).reverse();
 
     return (
       <ScrollView>
@@ -73,6 +72,5 @@ class Todos extends Component {
 }
 
 export default connect(state => ({
-  msg: state.intl.msg.todos,
   todos: state.todos.map
 }), todosActions)(Todos);

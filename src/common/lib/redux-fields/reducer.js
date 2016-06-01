@@ -1,5 +1,5 @@
 import * as actions from './actions';
-import {Map} from 'immutable';
+import { Map } from 'immutable';
 
 const initialState = Map();
 
@@ -8,13 +8,13 @@ export default function reducer(state = initialState, action) {
 
   switch (action.type) {
 
-    case actions.RESET_FIELDS: {
-      const {path} = action.payload;
+    case actions.ESTE_REDUX_FIELDS_RESET_FIELDS: {
+      const { path } = action.payload;
       return state.deleteIn(path);
     }
 
-    case actions.SET_FIELD: {
-      const {path, value} = action.payload;
+    case actions.ESTE_REDUX_FIELDS_SET_FIELD: {
+      const { path, value } = action.payload;
       return state.setIn(path, value);
     }
 

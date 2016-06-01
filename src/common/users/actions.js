@@ -1,8 +1,9 @@
-export const SET_USERS_LIST = 'SET_USERS_LIST';
+// Note prefix ON, it means the action is not dispatched by the viewer.
+export const ON_USERS_LIST = 'ON_USERS_LIST';
 
-export function setUsersList(users) {
+export function onUsersList(list) {
   return {
-    type: SET_USERS_LIST,
-    payload: {users}
+    type: ON_USERS_LIST,
+    payload: { list }
   };
 }

@@ -1,20 +1,27 @@
-import messages from './messages';
-import {Record} from 'immutable';
+import * as actions from './actions';
+import { Record } from 'immutable';
 
 const InitialState = Record({
-  availableLanguages: ['en'],
-  msg: messages.en,
-  selectedLanguage: 'en'
+  // Defined in server/frontend/render.js and native/index.js
+  currentLocale: null,
+  defaultLocale: null,
+  initialNow: null,
+  locales: null,
+  messages: {}
 });
 const initialState = new InitialState;
 
-const revive = state => initialState
-  .set('selectedLanguage', state.selectedLanguage);
+export default function intlReducer(state = initialState, action) {
+  if (!(state instanceof InitialState)) return new InitialState(state);
 
-export default function intlReducer(state = initialState) {
-  if (!(state instanceof InitialState)) return revive(state);
+  switch (action.type) {
 
-  // TODO: Add SET_APP_LANGUAGE action.
+    case actions.SET_CURRENT_LOCALE: {
+      const { locale } = action.payload;
+      return state.set('currentLocale', locale);
+    }
+
+  }
 
   return state;
 }

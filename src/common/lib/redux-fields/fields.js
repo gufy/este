@@ -1,7 +1,7 @@
 import Component from 'react-pure-render/component';
-import React, {PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 import invariant from 'invariant';
-import {resetFields, setField} from './actions';
+import { resetFields, setField } from './actions';
 
 const isReactNative =
   typeof navigator === 'object' &&
@@ -16,11 +16,11 @@ export default function fields(Wrapped, options) {
   } = options;
 
   invariant(Array.isArray(fields), 'Fields must be an array.');
-  invariant((
+  invariant(
     (typeof path === 'string') ||
     (typeof path === 'function') ||
     Array.isArray(path)
-  ), 'Path must be a string, function, or an array.');
+  , 'Path must be a string, function, or an array.');
 
   return class Fields extends Component {
 
@@ -36,11 +36,10 @@ export default function fields(Wrapped, options) {
       }
     }
 
-    static getFieldValue(field, model, props) {
+    static getFieldValue(field, model, initialState) {
       if (model && model.has(field)) {
         return model.get(field);
       }
-      const initialState = getInitialState && getInitialState(props);
       if (initialState && initialState.hasOwnProperty(field)) {
         return initialState[field];
       }
@@ -48,22 +47,33 @@ export default function fields(Wrapped, options) {
     }
 
     static lazyJsonValuesOf(model, props) {
+      const initialState = getInitialState && getInitialState(props);
       // http://www.devthought.com/2012/01/18/an-object-is-not-a-hash
       return options.fields.reduce((fields, field) => ({
         ...fields,
-        [field]: Fields.getFieldValue(field, model, props)
+        [field]: Fields.getFieldValue(field, model, initialState)
       }), Object.create(null));
     }
 
     static createFieldObject(field, onChange) {
-      return isReactNative ? {
+      const fieldObject = isReactNative ? {
         onChangeText: text => {
           onChange(field, text);
         }
       } : {
         name: field,
-        onChange: e => {
-          onChange(field, e.target.value);
+        onChange: (event) => {
+          // React-select is not passing an event but the target directly
+          const target = event.target || event;
+          const { type, checked, value } = target;
+          const isCheckbox = type && type.toLowerCase() === 'checkbox';
+          onChange(field, isCheckbox ? checked : value);
+        }
+      };
+      return {
+        ...fieldObject,
+        setValue(value) {
+          onChange(field, value);
         }
       };
     }
@@ -107,8 +117,8 @@ export default function fields(Wrapped, options) {
       options.fields.forEach(field => {
         this.fields[field].value = this.values[field];
       });
-      this.fields = {...this.fields}; // Ensure rerender for pure components.
-      this.setState({model});
+      this.fields = { ...this.fields }; // Ensure rerender for pure components.
+      this.setState({ model });
     }
 
     componentWillMount() {
@@ -117,7 +127,7 @@ export default function fields(Wrapped, options) {
     }
 
     componentDidMount() {
-      const {store} = this.context;
+      const { store } = this.context;
       this.unsubscribe = store.subscribe(() => {
         const newModel = this.getModelFromState();
         if (newModel === this.state.model) return;
